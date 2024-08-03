@@ -23,3 +23,9 @@ npm install
 ```shell copy
 npm run dev
 ```
+
+## Compile and Minify for Production
+
+```shell copy
+npm run build
+```
