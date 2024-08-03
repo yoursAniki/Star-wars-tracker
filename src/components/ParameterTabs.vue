@@ -4,7 +4,8 @@
 			class="mini-tab"
 			v-for="(param, index) in parameters"
 			:key="index"
-			@click="$emit('selectParam', param)"
+			@click="selectParam(param)"
+			:class="{ active: param === selectedParam }"
 		>
 			{{ param }}
 		</div>
@@ -12,13 +13,22 @@
 </template>
 
 <script lang="ts" setup>
+import { ref } from "vue";
+
 defineProps<{
 	parameters: string[];
 }>();
 
-defineEmits<{
-	(selectParam: string): void;
+const emit = defineEmits<{
+	(event: "selectParam", param: string): void;
 }>();
+
+const selectedParam = ref<string | null>(null);
+
+const selectParam = (param: string): void => {
+	selectedParam.value = param;
+	emit("selectParam", param);
+};
 </script>
 
 <style>
@@ -35,13 +45,14 @@ defineEmits<{
 	border-bottom: none;
 	margin-bottom: -1px;
 	user-select: none;
+	transition: .2s linear;
 }
 
 .mini-tab.active {
-	font-weight: bold;
 	border-color: #ccc;
 	border-bottom: 1px solid white;
 	background-color: white;
 	color: black;
+	transition: .2s linear;
 }
 </style>

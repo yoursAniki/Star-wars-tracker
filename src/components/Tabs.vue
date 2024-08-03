@@ -13,23 +13,31 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue';
+import { ref, watchEffect } from "vue";
+import { useRoute } from "vue-router";
 
-const tabs = ref(['Planets', 'Starships', 'People']);
+const tabs = ref(["Planets", "Starships", "People"]);
 const activeTabIndex = ref<number | null>(null);
-const emit = defineEmits(['tabSelected']);
+const emit = defineEmits(["tabSelected"]);
+
+const route = useRoute();
 
 const selectTab = (index: number): void => {
-  activeTabIndex.value = index;
-  emit('tabSelected', index);
-}
+	activeTabIndex.value = index;
+	emit("tabSelected", index);
+};
 
+watchEffect(() => {
+	const currentPath = route.path;
+	const tabRoutes = ["planets", "starships", "people"];
+	activeTabIndex.value = tabRoutes.indexOf(currentPath.replace("/", ""));
+});
 </script>
 
 <style>
 .tabs {
 	display: flex;
-  justify-content: center;
+	justify-content: center;
 	border-bottom: 1px solid #ccc;
 }
 
@@ -39,14 +47,15 @@ const selectTab = (index: number): void => {
 	border: 1px solid transparent;
 	border-bottom: none;
 	margin-bottom: -1px;
-  user-select: none;
+	user-select: none;
+	transition: 0.2s linear;
 }
 
 .tab.active {
-	font-weight: bold;
 	border-color: #ccc;
 	border-bottom: 1px solid white;
 	background-color: white;
-  color: black;
+	color: black;
+	transition: 0.2s linear;
 }
 </style>
