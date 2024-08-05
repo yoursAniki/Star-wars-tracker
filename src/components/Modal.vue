@@ -5,7 +5,7 @@
 		@keyup.esc="$emit('closeModal')"
 	>
 		<div class="modal-wrapper">
-			<div class="modal-container">
+			<div ref="modalContainer" class="modal-container">
 				<div class="modal-header">
 					<slot name="header"> default header </slot>
 				</div>
@@ -27,17 +27,17 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, onUnmounted } from "vue";
+import { onMounted, onUnmounted, ref } from "vue";
 
 const emit = defineEmits(["closeModal"]);
+const modalContainer = ref<HTMLElement | null>(null);
 
-function handleClickOutside(event: MouseEvent) {
+const handleClickOutside = (event: MouseEvent) => {
 	const target = event.target as HTMLElement;
-	const modalContainer = document.querySelector(".modal-container");
-	if (modalContainer && !modalContainer.contains(target)) {
+	if (modalContainer.value && !modalContainer.value.contains(target)) {
 		emit("closeModal");
 	}
-}
+};
 
 const handleKeydown = (event: KeyboardEvent) => {
 	if (event.key === "Escape") {
@@ -100,6 +100,7 @@ onUnmounted(() => {
 	display: block;
 	margin-top: 1rem;
 	user-select: none;
+	color: white;
 }
 
 .modal-enter-active,
