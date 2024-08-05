@@ -1,5 +1,5 @@
 export interface ICard {
 	name: string;
-	firstField: string;
-	secondField: string;
+	firstField: string | number;
+	secondField: string | number;
 }

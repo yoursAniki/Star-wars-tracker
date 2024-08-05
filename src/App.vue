@@ -7,6 +7,8 @@ import { useCardSelectionStore } from "./store/cardSelection";
 import Loader from "./components/Loader.vue";
 import Modal from "./components/Modal.vue";
 import { ICard } from "./interfaces/Card";
+import ContentPage from "./pages/ContentPage.vue";
+import { RouterView } from "vue-router";
 
 const starWarsStore = useStarWarsStore();
 const cardSelectionStore = useCardSelectionStore();
@@ -134,9 +136,7 @@ const resetComparison = () => {
 		</Modal>
 
 		<Tabs @tab-selected="selectTab" />
-
-		<Content v-if="!starWarsStore.loading" />
-
+		<RouterView v-if="!starWarsStore.loading" />
 		<Loader v-else />
 	</div>
 </template>
