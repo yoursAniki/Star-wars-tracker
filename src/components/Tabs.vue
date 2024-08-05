@@ -14,24 +14,30 @@
 
 <script lang="ts" setup>
 import { ref, watchEffect } from "vue";
-import { useRoute } from "vue-router";
 
-const tabs = ref(["Planets", "Starships", "People"]);
-const activeTabIndex = ref<number | null>(null);
-const emit = defineEmits(["tabSelected"]);
+const props = defineProps({
+	modelValue: {
+		type: Number,
+		required: true,
+	},
+	tabs: {
+		type: Array as () => string[],
+		required: true,
+	},
+});
 
-const route = useRoute();
+const activeTabIndex = ref<number>(props.modelValue);
+
+watchEffect(() => {
+	activeTabIndex.value = props.modelValue;
+});
+
+const emit = defineEmits(["update:modelValue"]);
 
 const selectTab = (index: number): void => {
 	activeTabIndex.value = index;
-	emit("tabSelected", index);
+	emit("update:modelValue", index);
 };
-
-watchEffect(() => {
-	const currentPath = route.path;
-	const tabRoutes = ["planets", "starships", "people"];
-	activeTabIndex.value = tabRoutes.indexOf(currentPath.replace("/", ""));
-});
 </script>
 
 <style>

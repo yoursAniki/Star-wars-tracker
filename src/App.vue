@@ -1,25 +1,32 @@
 <script setup lang="ts">
-import Content from "./components/Content.vue";
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useStarWarsStore } from "./store/starWars";
 import { useCardSelectionStore } from "./store/cardSelection";
 import Loader from "./components/Loader.vue";
 import Modal from "./components/Modal.vue";
 import { ICard } from "./interfaces/Card";
-import ContentPage from "./pages/ContentPage.vue";
 import { RouterView } from "vue-router";
+import Tabs from "./components/Tabs.vue";
 
 const starWarsStore = useStarWarsStore();
 const cardSelectionStore = useCardSelectionStore();
 
 const router = useRouter();
 
-const selectTab = (index: number): void => {
+const index = ref<number>(-1);
+
+const selectTab = (): void => {
 	router.push(
-		`/${index === 0 ? "planets" : index === 1 ? "starships" : "people"}`
+		`/${
+			index.value === 0 ? "planets" : index.value === 1 ? "starships" : "people"
+		}`
 	);
 };
+
+watch(index, () => {
+	selectTab();
+});
 
 onMounted(async () => {
 	await starWarsStore.fetchStarWarsData();
@@ -135,7 +142,7 @@ const resetComparison = () => {
 			</template>
 		</Modal>
 
-		<Tabs @tab-selected="selectTab" />
+		<Tabs v-model="index" :tabs="['Planets', 'Starships', 'People']" />
 		<RouterView v-if="!starWarsStore.loading" />
 		<Loader v-else />
 	</div>
