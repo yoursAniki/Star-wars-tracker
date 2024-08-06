@@ -106,9 +106,18 @@ button:focus-visible {
   transition: .8s linear;
 }
 
-.card-container:active {
-  background: #acacac3f;
+.card-container:hover {
+  background: #5b5b5b0e;
   transition: .8s linear;
+}
+
+.card-container:active {
+  background: rgba(255, 255, 0, 0.541);
+  transition: .8s linear;
+}
+
+.card-container.selected {
+  background: rgba(255, 255, 0, 0.498);
 }
 
 .card-title {

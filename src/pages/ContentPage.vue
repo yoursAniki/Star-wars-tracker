@@ -5,6 +5,7 @@
 	/>
 	<div class="cards-container" v-if="items.length">
 		<Card
+			:class="{ selected: item.selected }"
 			@click="selectItem(item)"
 			v-for="(item, index) in sortedItems"
 			:key="index"
@@ -25,6 +26,7 @@ interface Item {
 	name: string;
 	firstParam: number | string;
 	secondParam: number | string;
+	selected?: boolean;
 }
 
 const selectedParam = ref<number>(0);
@@ -60,6 +62,10 @@ const updateItems = () => {
 	} else {
 		items.value = [];
 	}
+
+	items.value.forEach(item => {
+		item.selected = false;
+	});
 };
 
 updateItems();
@@ -102,6 +108,14 @@ const selectItem = (item: Item) => {
 	};
 
 	cardSelectionStore.addCard(currentItem);
+
+	item.selected = true;
+	const selectedItems = items.value.filter(item => item.selected);
+	if (selectedItems.length === 2) {
+		selectedItems[0].selected = false;
+		selectedItems[1].selected = false;
+	}
+
 	console.log(
 		cardSelectionStore.firstSelectedCard,
 		cardSelectionStore.secondSelectedCard
