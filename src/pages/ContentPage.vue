@@ -1,8 +1,5 @@
 <template>
-	<Tabs
-		:tabs="['name', 'first param', 'second param']"
-		v-model="selectedParam"
-	/>
+	<Tabs :tabs="tabs" v-model="selectedParam" />
 	<div class="cards-container" v-if="items.length">
 		<Card
 			:class="{ selected: item.selected }"
@@ -10,6 +7,7 @@
 			v-for="(item, index) in sortedItems"
 			:key="index"
 			:params="item"
+			:paramNames="paramNames"
 		/>
 	</div>
 </template>
@@ -21,13 +19,7 @@ import { useStarWarsStore } from "../store/starWars";
 import { useCardSelectionStore } from "../store/cardSelection";
 import Card from "../components/Card.vue";
 import Tabs from "../components/Tabs.vue";
-
-interface Item {
-	name: string;
-	firstParam: number | string;
-	secondParam: number | string;
-	selected?: boolean;
-}
+import { ICard } from "../interfaces/Card";
 
 const selectedParam = ref<number>(0);
 
@@ -37,35 +29,58 @@ const category = ref(route.params.category as string);
 const starWarsStore = useStarWarsStore();
 const cardSelectionStore = useCardSelectionStore();
 
-const params = ref<string[]>(["name", "firstParam", "secondParam"]);
+const items = ref<ICard[]>([]);
 
-const items = ref<Item[]>([]);
+const paramsByCategory: Record<
+	string,
+	{
+		display: string[];
+		fields: string[];
+		paramNames: { first: string; second: string };
+	}
+> = {
+	starships: {
+		display: ["name", "length", "passengers"],
+		fields: ["name", "firstField", "secondField"],
+		paramNames: { first: "Length", second: "Passengers" },
+	},
+	planets: {
+		display: ["name", "diameter", "population"],
+		fields: ["name", "firstField", "secondField"],
+		paramNames: { first: "Diameter", second: "Population" },
+	},
+	people: {
+		display: ["name", "height", "mass"],
+		fields: ["name", "firstField", "secondField"],
+		paramNames: { first: "Height", second: "Mass" },
+	},
+};
+
 const updateItems = () => {
 	if (category.value === "starships") {
 		items.value = starWarsStore.starships.map(starship => ({
 			name: starship.name,
-			firstParam: starship.length,
-			secondParam: starship.passengers,
+			firstField: starship.length,
+			secondField: starship.passengers,
+			selected: false,
 		}));
 	} else if (category.value === "planets") {
 		items.value = starWarsStore.planets.map(planet => ({
 			name: planet.name,
-			firstParam: planet.diameter,
-			secondParam: planet.population,
+			firstField: planet.diameter,
+			secondField: planet.population,
+			selected: false,
 		}));
 	} else if (category.value === "people") {
 		items.value = starWarsStore.people.map(person => ({
 			name: person.name,
-			firstParam: person.height,
-			secondParam: person.mass,
+			firstField: person.height,
+			secondField: person.mass,
+			selected: false,
 		}));
 	} else {
 		items.value = [];
 	}
-
-	items.value.forEach(item => {
-		item.selected = false;
-	});
 };
 
 updateItems();
@@ -78,8 +93,29 @@ watch(
 	}
 );
 
-const sortedItems = computed<Item[]>(() => {
-	const param = params.value[selectedParam.value] as keyof Item;
+const tabs = computed(() => {
+	return (
+		paramsByCategory[category.value]?.display || [
+			"name",
+			"first param",
+			"second param",
+		]
+	);
+});
+
+const paramNames = computed(() => {
+	return (
+		paramsByCategory[category.value]?.paramNames || {
+			first: "First Param",
+			second: "Second Param",
+		}
+	);
+});
+
+const sortedItems = computed<ICard[]>(() => {
+	const param = paramsByCategory[category.value]?.fields[
+		selectedParam.value
+	] as keyof ICard;
 
 	return [...items.value].sort((a, b) => {
 		const aValue = a[param];
@@ -100,11 +136,11 @@ const sortedItems = computed<Item[]>(() => {
 	});
 });
 
-const selectItem = (item: Item) => {
+const selectItem = (item: ICard) => {
 	const currentItem = {
 		name: item.name,
-		firstField: item.firstParam.toString(),
-		secondField: item.secondParam.toString(),
+		firstField: item.firstField.toString(),
+		secondField: item.secondField.toString(),
 	};
 
 	cardSelectionStore.addCard(currentItem);

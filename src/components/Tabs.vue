@@ -4,18 +4,15 @@
 			v-for="(tab, index) in tabs"
 			:key="index"
 			@click="selectTab(index)"
-			:class="{ active: index === activeTabIndex }"
-			class="tab"
-		>
+			:class="{ active: index === modelValue }"
+			class="tab" >
 			{{ tab }}
 		</div>
 	</div>
 </template>
 
 <script lang="ts" setup>
-import { ref, watchEffect } from "vue";
-
-const props = defineProps({
+defineProps({
 	modelValue: {
 		type: Number,
 		required: true,
@@ -26,16 +23,9 @@ const props = defineProps({
 	},
 });
 
-const activeTabIndex = ref<number>(props.modelValue);
-
-watchEffect(() => {
-	activeTabIndex.value = props.modelValue;
-});
-
 const emit = defineEmits(["update:modelValue"]);
 
 const selectTab = (index: number): void => {
-	activeTabIndex.value = index;
 	emit("update:modelValue", index);
 };
 </script>

@@ -2,18 +2,20 @@
 	<div class="card-container">
 		<div class="card-title">{{ params.name }}</div>
 		<div class="card-first">
-			first param: <span>{{ params.firstParam }}</span>
+			{{ paramNames.first }}: <span>{{ params.firstField }}</span>
 		</div>
 		<div class="card-second">
-			second param: <span>{{ params.secondParam }}</span>
+			{{ paramNames.second }}: <span>{{ params.secondField }}</span>
 		</div>
 	</div>
 </template>
 
 <script lang="ts" setup>
 import "../style.css";
+import { ICard } from "../interfaces/Card";
 
-defineProps({
-	params: Object,
-});
+defineProps<{
+  params: ICard;
+  paramNames: { first: string; second: string };
+}>();
 </script>

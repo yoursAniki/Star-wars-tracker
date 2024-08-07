@@ -2,16 +2,76 @@
 	<div
 		class="modal-mask"
 		@click="handleClickOutside"
-		@keyup.esc="$emit('closeModal')"
+		@keyup.esc="$emit('closeModal'), resetComparison()"
 	>
 		<div class="modal-wrapper">
 			<div ref="modalContainer" class="modal-container">
 				<div class="modal-header">
-					<slot name="header"> default header </slot>
+					<span>Comparison of characteristics</span>
+					<img
+						@click="resetComparison()"
+						class="modal-marker"
+						src="/public/marker-solid.svg"
+						height="15"
+						alt=""
+					/>
 				</div>
 
 				<div class="modal-body">
-					<slot name="body"> default body </slot>
+					<div class="modal-data">
+						<table class="bordered-table">
+							<thead>
+								<tr>
+									<th>Card Name</th>
+									<th>{{ paramNames.first }}</th>
+									<th>{{ paramNames.second }}</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>{{ cardSelectionStore.firstSelectedCard?.name }}</td>
+									<td
+										:class="{
+											highlighted:
+												highlightActive && compareFields.firstField === 'first',
+										}"
+									>
+										{{ cardSelectionStore.firstSelectedCard?.firstField }}
+									</td>
+									<td
+										:class="{
+											highlighted:
+												highlightActive &&
+												compareFields.secondField === 'first',
+										}"
+									>
+										{{ cardSelectionStore.firstSelectedCard?.secondField }}
+									</td>
+								</tr>
+								<tr>
+									<td>{{ cardSelectionStore.secondSelectedCard?.name }}</td>
+									<td
+										:class="{
+											highlighted:
+												highlightActive &&
+												compareFields.firstField === 'second',
+										}"
+									>
+										{{ cardSelectionStore.secondSelectedCard?.firstField }}
+									</td>
+									<td
+										:class="{
+											highlighted:
+												highlightActive &&
+												compareFields.secondField === 'second',
+										}"
+									>
+										{{ cardSelectionStore.secondSelectedCard?.secondField }}
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
 				</div>
 
 				<div class="modal-footer">
@@ -27,10 +87,17 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, onUnmounted, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
+import { useCardSelectionStore } from "../store/cardSelection";
+import { ICard } from "../interfaces/Card";
+
+defineProps<{
+	paramNames: { first: string; second: string };
+}>();
 
 const emit = defineEmits(["closeModal"]);
 const modalContainer = ref<HTMLElement | null>(null);
+const cardSelectionStore = useCardSelectionStore();
 
 const handleClickOutside = (event: MouseEvent) => {
 	const target = event.target as HTMLElement;
@@ -44,6 +111,41 @@ const handleKeydown = (event: KeyboardEvent) => {
 		emit("closeModal");
 	}
 };
+
+const highlightActive = ref<boolean>(true);
+
+const resetComparison = () => {
+	highlightActive.value = !highlightActive.value;
+};
+
+const isNumeric = (value: any): boolean =>
+	!isNaN(value) && !isNaN(parseFloat(value)) && value !== "unknown";
+
+const compareFields = computed(() => {
+	const first: ICard | null = cardSelectionStore.firstSelectedCard;
+	const second: ICard | null = cardSelectionStore.secondSelectedCard;
+
+	if (first && second) {
+		return {
+			firstField:
+				isNumeric(first.firstField) && isNumeric(second.firstField)
+					? Number(first.firstField) > Number(second.firstField)
+						? "first"
+						: "second"
+					: null,
+			secondField:
+				isNumeric(first.secondField) && isNumeric(second.secondField)
+					? Number(first.secondField) > Number(second.secondField)
+						? "first"
+						: "second"
+					: null,
+		};
+	}
+	return {
+		firstField: null,
+		secondField: null,
+	};
+});
 
 onMounted(() => {
 	window.addEventListener("keydown", handleKeydown);
@@ -117,5 +219,25 @@ onUnmounted(() => {
 	user-select: none;
 	cursor: pointer;
 	margin-left: 10px;
+}
+
+.highlighted {
+	font-weight: 800;
+}
+
+.bordered-table {
+	border-collapse: collapse;
+	width: 100%;
+}
+
+.bordered-table th,
+.bordered-table td {
+	border: 1px solid black;
+	padding: 8px;
+	text-align: left;
+}
+
+.bordered-table th {
+	background-color: #f2f2f2;
 }
 </style>

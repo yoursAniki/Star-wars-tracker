@@ -1,151 +1,73 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from "vue";
+import { onMounted, ref, watch, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useStarWarsStore } from "./store/starWars";
 import { useCardSelectionStore } from "./store/cardSelection";
 import Loader from "./components/Loader.vue";
 import Modal from "./components/Modal.vue";
-import { ICard } from "./interfaces/Card";
 import { RouterView } from "vue-router";
 import Tabs from "./components/Tabs.vue";
 
 const starWarsStore = useStarWarsStore();
 const cardSelectionStore = useCardSelectionStore();
-
 const router = useRouter();
-
 const index = ref<number>(-1);
 
+type Category = 'starships' | 'planets' | 'people';
+
+const paramsByCategory: Record<Category, { first: string; second: string }> = {
+  starships: {
+    first: 'Length',
+    second: 'Passengers'
+  },
+  planets: {
+    first: 'Diameter',
+    second: 'Population'
+  },
+  people: {
+    first: 'Height',
+    second: 'Mass'
+  }
+};
+
+const paramNames = computed(() => {
+  const category = router.currentRoute.value.params.category as Category;
+  return paramsByCategory[category] || { first: "First Param", second: "Second Param" };
+});
+
 const selectTab = (): void => {
-	router.push(
-		`/${
-			index.value === 0 ? "planets" : index.value === 1 ? "starships" : "people"
-		}`
-	);
+  router.push(
+    `/${
+      index.value === 0 ? "planets" : index.value === 1 ? "starships" : "people"
+    }`
+  );
 };
 
 watch(index, () => {
-	selectTab();
+  selectTab();
 });
 
 onMounted(async () => {
-	await starWarsStore.fetchStarWarsData();
+  await starWarsStore.fetchStarWarsData();
 });
-
-const isNumeric = (value: any): boolean =>
-	!isNaN(value) && !isNaN(parseFloat(value)) && value !== "unknown";
-
-const highlightActive = ref<boolean>(true);
-
-const compareFields = computed(() => {
-	const first: ICard | null = cardSelectionStore.firstSelectedCard;
-	const second: ICard | null = cardSelectionStore.secondSelectedCard;
-
-	if (first && second) {
-		return {
-			firstField:
-				isNumeric(first.firstField) && isNumeric(second.firstField)
-					? Number(first.firstField) > Number(second.firstField)
-						? "first"
-						: "second"
-					: null,
-			secondField:
-				isNumeric(first.secondField) && isNumeric(second.secondField)
-					? Number(first.secondField) > Number(second.secondField)
-						? "first"
-						: "second"
-					: null,
-		};
-	}
-	return {
-		firstField: null,
-		secondField: null,
-	};
-});
-
-const resetComparison = () => {
-	highlightActive.value = !highlightActive.value;
-};
 </script>
 
 <template>
-	<div class="wrapper">
-		<Modal
-			v-show="
-				cardSelectionStore.firstSelectedCard &&
-				cardSelectionStore.secondSelectedCard
-			"
-			@close-modal="cardSelectionStore.resetCards(), (highlightActive = true)"
-		>
-			<template v-slot:header>
-				<span>Comparison of characteristics</span>
-				<img
-					@click="resetComparison()"
-					class="modal-marker"
-					src="/public/marker-solid.svg"
-					height="15"
-					alt=""
-				/>
-			</template>
-			<template v-slot:body>
-				<div class="modal-data">
-					<table class="bordered-table">
-						<thead>
-							<tr>
-								<th>Card Name</th>
-								<th>First Field</th>
-								<th>Second Field</th>
-							</tr>
-						</thead>
-						<tbody>
-							<tr>
-								<td>{{ cardSelectionStore.firstSelectedCard?.name }}</td>
-								<td
-									:class="{
-										highlighted:
-											highlightActive && compareFields.firstField === 'first',
-									}"
-								>
-									{{ cardSelectionStore.firstSelectedCard?.firstField }}
-								</td>
-								<td
-									:class="{
-										highlighted:
-											highlightActive && compareFields.secondField === 'first',
-									}"
-								>
-									{{ cardSelectionStore.firstSelectedCard?.secondField }}
-								</td>
-							</tr>
-							<tr>
-								<td>{{ cardSelectionStore.secondSelectedCard?.name }}</td>
-								<td
-									:class="{
-										highlighted:
-											highlightActive && compareFields.firstField === 'second',
-									}"
-								>
-									{{ cardSelectionStore.secondSelectedCard?.firstField }}
-								</td>
-								<td
-									:class="{
-										highlighted:
-											highlightActive && compareFields.secondField === 'second',
-									}"
-								>
-									{{ cardSelectionStore.secondSelectedCard?.secondField }}
-								</td>
-							</tr>
-						</tbody>
-					</table>
-				</div>
-			</template>
-		</Modal>
+  <div class="wrapper">
+    <Modal
+      v-show="
+        cardSelectionStore.firstSelectedCard &&
+        cardSelectionStore.secondSelectedCard
+      "
+      @closeModal="cardSelectionStore.resetCards()"
+      :paramNames="paramNames"
+    >
+    </Modal>
 
-		<Tabs v-model="index" :tabs="['Planets', 'Starships', 'People']" />
-		<RouterView v-if="!starWarsStore.loading" />
-		<Loader v-else />
-	</div>
+    <Tabs v-model="index" :tabs="['Planets', 'Starships', 'People']" />
+    <RouterView v-if="!starWarsStore.loading" />
+    <Loader v-else />
+  </div>
 </template>
 
 <style scoped>
@@ -154,25 +76,5 @@ const resetComparison = () => {
 	flex-direction: column;
 	min-height: 100vh;
 	background: white;
-}
-
-.highlighted {
-	font-weight: 800;
-}
-
-.bordered-table {
-	border-collapse: collapse;
-	width: 100%;
-}
-
-.bordered-table th,
-.bordered-table td {
-	border: 1px solid black;
-	padding: 8px;
-	text-align: left;
-}
-
-.bordered-table th {
-	background-color: #f2f2f2;
 }
 </style>
