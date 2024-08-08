@@ -23,8 +23,7 @@
 							<thead>
 								<tr>
 									<th>Card Name</th>
-									<th>{{ paramNames.first }}</th>
-									<th>{{ paramNames.second }}</th>
+									<th v-for="param in paramNames">{{ param.name }}</th>
 								</tr>
 							</thead>
 							<tbody>
@@ -92,7 +91,7 @@ import { useCardSelectionStore } from "../store/cardSelection";
 import { ICard } from "../interfaces/Card";
 
 defineProps<{
-	paramNames: { first: string; second: string };
+	paramNames: { name: string }[];
 }>();
 
 const emit = defineEmits(["closeModal"]);

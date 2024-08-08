@@ -1,11 +1,12 @@
 <template>
 	<div class="card-container">
 		<div class="card-title">{{ params.name }}</div>
-		<div class="card-first">
-			{{ paramNames.first }}: <span>{{ params.firstField }}</span>
-		</div>
-		<div class="card-second">
-			{{ paramNames.second }}: <span>{{ params.secondField }}</span>
+		<div 
+			class="card-item" 
+			v-for="(paramName, index) in paramNames" 
+			:key="index"
+		>
+			{{ paramName }}: <span>{{ params[fields[index]] }}</span>
 		</div>
 	</div>
 </template>
@@ -16,6 +17,7 @@ import { ICard } from "../interfaces/Card";
 
 defineProps<{
   params: ICard;
-  paramNames: { first: string; second: string };
+  paramNames: string[];
+  fields: (keyof ICard)[];
 }>();
 </script>

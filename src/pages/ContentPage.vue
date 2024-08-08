@@ -8,6 +8,7 @@
 			:key="index"
 			:params="item"
 			:paramNames="paramNames"
+			:fields="fields"
 		/>
 	</div>
 </template>
@@ -35,24 +36,24 @@ const paramsByCategory: Record<
 	string,
 	{
 		display: string[];
-		fields: string[];
-		paramNames: { first: string; second: string };
+		fields: (keyof ICard)[];
+		paramNames: string[];
 	}
 > = {
 	starships: {
 		display: ["name", "length", "passengers"],
-		fields: ["name", "firstField", "secondField"],
-		paramNames: { first: "Length", second: "Passengers" },
+		fields: ["firstField", "secondField"],
+		paramNames: ["Length", "Passengers"],
 	},
 	planets: {
 		display: ["name", "diameter", "population"],
-		fields: ["name", "firstField", "secondField"],
-		paramNames: { first: "Diameter", second: "Population" },
+		fields: ["firstField", "secondField"],
+		paramNames: ["Diameter", "Population"],
 	},
 	people: {
 		display: ["name", "height", "mass"],
-		fields: ["name", "firstField", "secondField"],
-		paramNames: { first: "Height", second: "Mass" },
+		fields: ["firstField", "secondField"],
+		paramNames: ["Height", "Mass"], 
 	},
 };
 
@@ -104,18 +105,15 @@ const tabs = computed(() => {
 });
 
 const paramNames = computed(() => {
-	return (
-		paramsByCategory[category.value]?.paramNames || {
-			first: "First Param",
-			second: "Second Param",
-		}
-	);
+	return paramsByCategory[category.value]?.paramNames || ["First Param", "Second Param"];
+});
+
+const fields = computed(() => {
+	return paramsByCategory[category.value]?.fields || ["firstField", "secondField"];
 });
 
 const sortedItems = computed<ICard[]>(() => {
-	const param = paramsByCategory[category.value]?.fields[
-		selectedParam.value
-	] as keyof ICard;
+	const param = fields.value[selectedParam.value] as keyof ICard;
 
 	return [...items.value].sort((a, b) => {
 		const aValue = a[param];

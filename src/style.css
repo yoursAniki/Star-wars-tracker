@@ -127,13 +127,7 @@ button:focus-visible {
   font-weight: 700;
 }
 
-.card-first span {
-  font-weight: 600;
-  font-size: 18px;
-  color: rgb(0, 0, 0);
-}
-
-.card-second span {
+.card-item span {
   font-weight: 600;
   font-size: 18px;
   color: rgb(0, 0, 0);
